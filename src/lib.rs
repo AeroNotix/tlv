@@ -26,9 +26,7 @@ pub fn encode_tlv(hm: &HashMap<u16, String>) -> Vec<u8> {
         buf.write(v.as_bytes()).unwrap();
         let align = as_aligned(write_length);
         if align != 0 {
-            let mut align_vec = Vec::new();
-            align_vec.resize(align as usize, 0);
-            buf.write(align_vec.as_slice()).unwrap();
+            buf.write(vec![0; align as usize].as_slice()).unwrap();
         }
     };
     buf.into_inner().unwrap()
