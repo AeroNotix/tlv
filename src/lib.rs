@@ -14,7 +14,7 @@ fn as_aligned(i: u16) -> u16 {
     }
 }
 
-pub fn encode_tlv(hm: &HashMap<u16, String>) -> Vec<u8> {
+pub fn encode(hm: &HashMap<u16, String>) -> Vec<u8> {
     // each entry has at least 2 bytes
     let vec = Vec::with_capacity(hm.len() * 2);
     let mut buf = std::io::BufWriter::new(vec);
@@ -32,7 +32,7 @@ pub fn encode_tlv(hm: &HashMap<u16, String>) -> Vec<u8> {
     buf.into_inner().unwrap()
 }
 
-pub fn decode_tlv<T: std::io::BufRead>(mut buf: &mut T) -> Result<HashMap<u16, String>, std::io::Error> {
+pub fn decode<T: std::io::BufRead>(mut buf: &mut T) -> Result<HashMap<u16, String>, std::io::Error> {
     let mut attrs = HashMap::new();
     while let Ok(attr_type) = buf.read_u16::<BigEndian>() {
         let length = try!(buf.read_u16::<BigEndian>());
@@ -60,7 +60,7 @@ mod tests {
     fn test_decode_tlv() {
         let attrs_raw = vec![0, 6, 0, 5, 72, 101, 108, 108, 111, 0, 0, 0, 0, 6, 0, 5, 72, 101, 108, 108, 111, 0, 0, 0];
         let rdr = &mut Cursor::new(attrs_raw);
-        match decode_tlv(rdr) {
+        match decode(rdr) {
             Ok(m) => {
                 assert_eq!(m.len(), 1);
                 match m.get(&6) {
@@ -78,14 +78,14 @@ mod tests {
         let attrs_raw = vec![0, 6, 0, 5, 72, 101, 108, 108, 111, 0, 0, 0];
         let mut hm = HashMap::new();
         hm.insert(6 as u16, "Hello".to_string());
-        assert_eq!(encode_tlv(&hm), attrs_raw);
+        assert_eq!(encode(&hm), attrs_raw);
     }
 
     #[test]
     fn test_encode_decode_tlv() {
         let mut hm = HashMap::new();
         hm.insert(6 as u16, "Hello".to_string());
-        let encoded = &mut Cursor::new(encode_tlv(&hm));
-        assert_eq!(hm, decode_tlv(encoded).unwrap());
+        let encoded = &mut Cursor::new(encode(&hm));
+        assert_eq!(hm, decode(encoded).unwrap());
     }
 }
