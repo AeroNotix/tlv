@@ -65,11 +65,11 @@ mod tests {
                 assert_eq!(m.len(), 1);
                 match m.get(&6) {
                     Some(v) => assert_eq!(v.to_string(), "Hello".to_string()),
-                    None => assert_eq!(false, true)
+                    None => unreachable!("Decoding did not return the correct data!")
                 }
             },
             Err(err) =>
-                println!("{:?}:", err)
+                unreachable!("Decoding did not return the correct data!")
         }
     }
 
